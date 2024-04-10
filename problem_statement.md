@@ -1,4 +1,4 @@
-# trans-maf-forecasting
+x# trans-maf-forecasting
 
 ## Описание задачи
 
@@ -18,6 +18,10 @@ trans-maf-forecasting
 |      | -- MetricsComparison__run_00.ipynb             # сравнение прогнозов Trans-MAF и TimeGrad на регулярных временных рядах
 |      |
 |      | -- MetricsComparison__run_02.ipynb             # анализ прогнозов Trans-MAF на нерегулярных временных рядах
+|      |
+|      | -- MetricsComparison__run_03_0.ipynb           # анализ прогнозов Trans-MAF на нерегулярных временных рядах c признаками по дате
+|
+|      | -- MetricsComparison__run_03_1.ipynb           # сравнение прогнозов Trans-MAF на нерегулярных рядах с/без признаков по дате
 |
 | --- time_grad
 |      |
@@ -37,10 +41,19 @@ trans-maf-forecasting
 |      |       |
 |      |       | --- maf_run_02.ipynb                  # обучение и прогнозирование нерегулярных временных рядов Trans-MAF
 |      |       |
+|      |       | --- maf_run_03.ipynb                  # обучение и прогнозирование нерегулярных временных рядов Trans-MAF c признаками по дате
 |      |
 |      | --- requirements.txt                          # зависимости для успешного запуска Trans-MAF
 |
-| --- README.md                                        # описание проекта
+| --- transmaf                                         # библиотека Trans-MAF
+|      |
+|      | --- ...
+|
+| --- README.md                                        # инструкция по установке библиотеки
+|
+| --- problem_statement.md                             # описание ВКР
+|
+| --- setup.py                                         # модуль для построения библиотеки
 ```
 
 ## Данные

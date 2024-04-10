@@ -5,4 +5,5 @@
 lightning_logs/
 /time_grad/notebooks/reports
 /trans_maf/notebooks/reports
-
+dist/
+transmaf.egg-info/
