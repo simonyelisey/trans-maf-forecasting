@@ -1,3 +1,27 @@
+Metadata-Version: 2.1
+Name: transmaf
+Version: 0.1.4
+Summary: Probabilistic Time Series Modeling using Trans-MAF model.
+Home-page: https://github.com/simonyelisey/trans-maf-forecasting
+Author: Semen Eliseev
+Author-email: yeliseevsemyon@gmail.com
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: LICENSE.gluon-ts
+License-File: LICENSE.pytorch-ts
+Requires-Dist: torch==2.1.0
+Requires-Dist: lightning==2.1.3
+Requires-Dist: pytorch-lightning==2.1.3
+Requires-Dist: protobuf~=3.20.3
+Requires-Dist: gluonts==0.14.3
+Requires-Dist: holidays
+Requires-Dist: pandas==2.2.0
+Requires-Dist: numpy==1.23.5
+Requires-Dist: matplotlib
+Requires-Dist: diffusers==0.25.1
+
 # transmaf
 
 transmaf это библиотека на основе [PyTorch](https://github.com/pytorch/pytorch) для вероятностного прогнозирования временных рядов с использованием модела Trans-MAF. В качестве бэк-энд API используется [GluonTS](https://github.com/awslabs/gluon-ts) для загрузки, трансформации и бэк-теста датасетов.
@@ -43,7 +67,6 @@ electricity_dataset_test = electricity_test_grouper(electricity.test)
 ### Train estimator
 ```python
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 estimator = TransformerTempFlowEstimator(
     input_size=744,
