@@ -1,5 +1,7 @@
 # transmaf
 
+**описание проведенных экспериментов в `./problem_statement.md`*
+
 transmaf это библиотека на основе [PyTorch](https://github.com/pytorch/pytorch) для вероятностного прогнозирования временных рядов с использованием модела Trans-MAF. В качестве бэк-энд API используется [GluonTS](https://github.com/awslabs/gluon-ts) для загрузки, трансформации и бэк-теста датасетов.
 
 ## Installation
