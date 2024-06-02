@@ -1,49 +1,98 @@
-# trans-maf-forecasting
+# transmaf
 
-## Описание задачи
+**описание проведенных экспериментов в `./problem_statement.md`*
 
-Прогнозирование многомерных временных рядов с помощью условных нормализующих потоков [Trans-MAF](https://arxiv.org/pdf/2002.06103.pdf). 
+transmaf это библиотека на основе [PyTorch](https://github.com/pytorch/pytorch) для вероятностного прогнозирования временных рядов с использованием модела Trans-MAF. В качестве бэк-энд API используется [GluonTS](https://github.com/awslabs/gluon-ts) для загрузки, трансформации и бэк-теста датасетов.
 
-В ходе исследования проводятся следующие эксперименты:
-  - прогнозирование регулярных временных рядов с использованием модели Trans-MAF;
-  - сравнение Trans-MAF с диффузионной моделью для прогнозирования временных рядов [TimeGrad](https://arxiv.org/abs/2305.00624.pdf);
-  - прогнозирование нерегулярных временных рядов с долей пропусков в данных от 10% до 80%.
+## Installation
+
+```
+$ pip install transmaf
+```
+
+## Quick start
+### Imports
+```python
+import numpy as np
+import torch
+
+from gluonts.dataset.multivariate_grouper import MultivariateGrouper
+from gluonts.dataset.repository.datasets import get_dataset
+from gluonts.evaluation import MultivariateEvaluator
+from gluonts.evaluation.backtest import make_evaluation_predictions
+
+from transmaf import Trainer
+from transmaf.model.transformer_tempflow import TransformerTempFlowEstimator
+```
+### Read data
+```python
+electricity = get_dataset("electricity_nips", regenerate=False)
+
+# create train/test groupers
+electricity_train_grouper = MultivariateGrouper(
+    max_target_dim=min(2000, int(electricity.metadata.feat_static_cat[0].cardinality))
+    )
+electricity_test_grouper = MultivariateGrouper(
+    num_test_dates=int(len(electricity.test) / len(electricity.train)), 
+    max_target_dim=min(2000, int(electricity.metadata.feat_static_cat[0].cardinality))
+    )
+
+# create train/test datasets
+electricity_dataset_train = list(electricity_train_grouper(electricity.train))
+electricity_dataset_train *= 100 
+electricity_dataset_test = electricity_test_grouper(electricity.test)
+```
+### Train estimator
+```python
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-## Данные
+estimator = TransformerTempFlowEstimator(
+    input_size=744,
+    target_dim=int(electricity.metadata.feat_static_cat[0].cardinality),
+    prediction_length=electricity.metadata.prediction_length,
+    context_length=electricity.metadata.prediction_length * 4,
+    flow_type='MAF',
+    dequantize=True,
+    freq=electricity.metadata.freq,
+    trainer=Trainer(
+        device='cpu',
+        epochs=14,
+        learning_rate=1e-3,
+        num_batches_per_epoch=100,
+        batch_size=64,
+    )
+)
 
-Используются датасеты из открытых источников:
+predictor = estimator.train(
+    electricity_dataset_train, 
+    num_workers=4
+    )
+```
+### Prediction
+```python
+# init evaluator
+evaluator = MultivariateEvaluator(
+    quantiles=(np.arange(20)/20.0)[1:],
+    target_agg_funcs={'sum': np.sum}
+)
 
-1. Solar:
-   - гранулярность: H;
-   - число компонент: 137;
-   - обучающая выборка: 2006-01-01 00:00:00 - 2006-10-20 00:00:00 (7033 точки);
-   - тестовая выборка: 2006-10-20 01:00:00 - 2006-10-27 00:00:00 (168 точек);
-   - длина прогноза: 24.
-3. Electricity:
-   - гранулярность: H;
-   - число компонент: 370;
-   - обучающая выборка: 2014-03-19 09:00 - 2014-09-01 00:00 (4000 точки);
-   - тестовая выборка: 2014-09-01 01:00 - 2014-09-08 00:00:00 (168 точек);
-   - длина прогноза: 24.
-5. Exchange:
-   - гранулярность: B;
-   - число компонент: 8;
-   - обучающая выборка: 1990-01-01 - 2013-04-08 (6101 точки);
-   - тестовая выборка: 2013-04-09 - 2013-11-04 (150 точек);
-   - длина прогноза: 30.
+# prediction
+forecast_it, ts_it = make_evaluation_predictions(
+    dataset=electricity_dataset_test,
+    predictor=predictor,
+    num_samples=20
+)
 
-## Итоговый продукт
+forecasts = list(forecast_it)
+targets = list(ts_it)
+```
+### Calculate metrics
+```python
+agg_metric, _ = evaluator(
+    targets, forecasts, num_series=len(electricity_dataset_test)
+    )
+```
 
-Итоговым продуктом является библиотека на языке Python для прогноза многомерных рядов с помощью модели Trans-MAF.
 
-## План работы
-1. [2024-02-29] - Завершение всех экспериментов;
-2. [2024-03-14] - Создание библиотеки;
-3. [2024-04-31] - Завершение оформления статьи.
-   
-## Контакты
 
-**Автор работы**: Елисеев Семен, студент НИУ ВШЭ, tg: @simonyelisey;
-
-**Научный руководитель**: Гущин Михаил, старший научный сотрудник НИУ ВШЭ, tg: @mikhail_h91

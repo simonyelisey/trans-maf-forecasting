@@ -1,0 +1,9 @@
+/ERRORS.txt
+/NOTES.txt
+/TODO.txt
+*.DS_Store
+lightning_logs/
+/time_grad/notebooks/reports
+/trans_maf/notebooks/reports
+dist/
+transmaf.egg-info/
